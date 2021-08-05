@@ -4,7 +4,7 @@ This is a URL preview plugin that previews the content of a URL
 
 Language: [English](README.md) | [Português](README-PT.md)
 
-![Demo](images/web1.PNG)
+![Demo](images/web1.png)
 
 ## Special feature
 

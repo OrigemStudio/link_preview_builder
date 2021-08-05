@@ -2,9 +2,9 @@
 
 Este é um plugin de visualização de URL que visualiza o conteúdo de um URL
 
-Idioma: [Inglês] (README.md) | [Português] (README-PT.md)
+Idioma: [Inglês](README.md) | [Português](README-PT.md)
 
-! [Demo] (images/web1.PNG)
+![Demo](images/web1.png)
 
 ## Característica especial
 

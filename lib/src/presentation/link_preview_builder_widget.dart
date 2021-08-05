@@ -73,7 +73,6 @@ class _LinkPreviewBuilderState extends State<LinkPreviewBuilder> {
     return ValueListenableBuilder<status>(
         valueListenable: _controller.state,
         builder: (_, state, child) {
-          print(state);
           switch (state) {
             case status.init:
               return widget.onEmpty ?? const BuildEmpty();
@@ -83,8 +82,10 @@ class _LinkPreviewBuilderState extends State<LinkPreviewBuilder> {
                   : BuildSuccess(info: _controller.data.value!);
             case status.error:
               return widget.onError != null
-                  ? widget.onError!(_controller.error.value!)
-                  : BuildError(error: _controller.error.value!);
+                  ? widget.onError!(
+                      _controller.error.value ?? 'Error fetching data!')
+                  : BuildError(
+                      error: _controller.error.value ?? 'Error fetching data!');
             case status.loading:
               return widget.onEmpty ?? const BuildLoading();
           }

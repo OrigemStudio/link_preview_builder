@@ -2,43 +2,66 @@
 
 This is a URL preview plugin that previews the content of a URL
 
-Language: [English](README.md) | [中文简体](README-ZH.md)
+Language: [English](README.md) | [Português](README-PT.md)
 
-![Demo](images/web1.png)
+![Demo](images/web1.PNG)
 
 ## Special feature
 
--   Use multi-processing to parse web pages, avoid blocking the main process
--   Support for content caching and expiration mechanisms to return results faster
--   Better fault tolerance, multiple ways to find icons, titles, descriptions, image
--   Better support gbk code, no messy code
--   Optimized for large files with better crawl performance
--   Support for second hop authentication with cookies
--   Support gif, video and other content capture
--   Supports custom builder
+- Working on cross-platforms, including web
+- Receive only data without using the widget
+- Modifiable state constructors: onEmpty, onError, onLoading and build
+- Use multiprocessing to analyze web pages, avoid blocking the main process
+- Support for content caching and expiration mechanisms to return results faster
+- Better fault tolerance, multiple ways to find icons, titles, descriptions, image
+- Better gbk code support, no confusing code
+- Optimized for large files with better tracking performance
+- Support for second-hop authentication with cookies
+- Supports GIF, video and other content capture 
 
 ## Getting Started
 
+You can get some the data or use de widget
+
+## Get Preview Data
+
 ```dart
-FlutterLinkPreview(
-    url: "https://github.com",
-    titleStyle: TextStyle(
-        color: Colors.blue,
-        fontWeight: FontWeight.bold,
-    ),
+final GetLinkPreview _getLinkPreview = GetLinkPreview();
+final result = await _getLinkPreview.call(_url);
+```
+
+## Simple use widget with url
+
+```dart
+LinkPreviewBuilder(
+  url: 'https://www.youtube.com/watch?v=cYV4Ysw0Iuc'
 )
 ```
 
-Result:
+## Simple use widget with InfoData after received of GetLinkPreview
 
-![Result Image](images/web2.png)
+```dart
+LinkPreviewBuilder(
+  info: InfoData(),
+)
+```
 
-## Custom Rendering
+## Change state widgets
+
+```dart
+LinkPreviewBuilder(
+  url: controller.value.text,
+  onEmpty: const Text('empty state'),
+  onError: (error) => Text(error ?? 'error'),
+  onLoading: const CircularProgressIndicator(),
+  builder: (info) => Text((info as WebInfo).title!));
+```
+
+## Custom Rendering with builder 
 
 ```dart
 Widget _buildCustomLinkPreview(BuildContext context) {
-  return FlutterLinkPreview(
-    key: ValueKey("${_controller.value.text}211"),
+  return LinkPreviewBuilder(
     url: _controller.value.text,
     builder: (info) {
       if (info == null) return const SizedBox();
@@ -107,8 +130,6 @@ Widget _buildCustomLinkPreview(BuildContext context) {
   );
 }
 ```
-
-![Result Image](images/web3.png)
 
 ## Sample code
 

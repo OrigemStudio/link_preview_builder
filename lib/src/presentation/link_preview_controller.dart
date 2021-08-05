@@ -19,12 +19,18 @@ class LinkPreviewController {
       state.value = status.error;
     } else if (info == null) {
       final _url = url!.trim();
-      final result = await _getLinkPreview.call(_url);
-      if (result == null) {
+      try {
+        final result = await _getLinkPreview.call(_url);
+        if (result == null) {
+          state.value = status.error;
+          error.value = 'Empty response';
+        } else {
+          data.value = result;
+          state.value = status.success;
+        }
+      } on Exception catch (e) {
         state.value = status.error;
-      } else {
-        data.value = result;
-        state.value = status.success;
+        error.value = e.toString();
       }
     } else {
       data.value = info;

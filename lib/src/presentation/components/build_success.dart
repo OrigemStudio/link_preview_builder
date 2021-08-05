@@ -36,7 +36,7 @@ class BuildSuccess extends StatelessWidget {
             ),
           ],
         ),
-        if (WebAnalyzer.isNotEmpty(data.description)) ...[
+        if (data.description != null) ...[
           const SizedBox(height: 8),
           Text(
             data.description!,

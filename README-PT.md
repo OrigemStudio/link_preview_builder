@@ -1,44 +1,67 @@
 # link_preview_builder
 
-这是一个网址预览插件，可以预览网址的内容。
+Este é um plugin de visualização de URL que visualiza o conteúdo de um URL
 
-文档语言: [English](README.md) | [中文简体](README-ZH.md)
+Idioma: [Inglês] (README.md) | [Português] (README-PT.md)
 
-![Demo](images/web1.png)
+! [Demo] (images/web1.PNG)
 
-## 特色功能
+## Característica especial
 
--   采用多进程解析网页，避免阻塞主进程
--   支持内容缓存及过期机制，能更快地返回结果
--   更好的容错能力，多种方式查找 icon,title,descriptions,image
--   更好的支持中文编码，没有乱码
--   对大文件进行优化，有更好的抓取性能
--   支持携带 cookies 进行二次跳转验证
--   支持 gif，视频 等内容抓取
--   支持自定义渲染
+- Trabalho em plataformas cruzadas, incluindo web
+- Receba apenas dados sem usar o widget
+- Construtores de estado modificáveis: onEmpty, onError, onLoading e build
+- Use multiprocessamento para analisar páginas da web, evite bloquear o processo principal
+- Suporte para armazenamento em cache de conteúdo e mecanismos de expiração para retornar resultados mais rapidamente
+- Melhor tolerância a falhas, várias maneiras de encontrar ícones, títulos, descrições, imagem
+- Melhor suporte ao código gbk, sem código confuso
+- Otimizado para arquivos grandes com melhor desempenho de rastreamento
+- Suporte para autenticação de segundo salto com cookies
+- Suporta GIF, vídeo e outra captura de conteúdo
 
-## 开始入门
+## Começando
+
+Você pode obter alguns dados ou usar o widget
+
+## Obter dados de visualização
 
 ```dart
-FlutterLinkPreview(
-    url: "https://github.com",
-    titleStyle: TextStyle(
-        color: Colors.blue,
-        fontWeight: FontWeight.bold,
-    ),
+final GetLinkPreview _getLinkPreview = GetLinkPreview();
+final result = await _getLinkPreview.call(_url);
+```
+
+## Widget de uso simples com url
+
+```dart
+LinkPreviewBuilder(
+  url: 'https://www.youtube.com/watch?v=cYV4Ysw0Iuc'
 )
 ```
 
-结果:
+## Widget de uso simples com InfoData após receber do GetLinkPreview
 
-![Result Image](images/web2.png)
+```dart
+LinkPreviewBuilder(
+  info: InfoData(),
+)
+```
 
-## 自定义渲染
+## Widgets de mudança de estado
+
+```dart
+LinkPreviewBuilder(
+  url: controller.value.text,
+  onEmpty: const Text('empty state'),
+  onError: (error) => Text(error ?? 'error'),
+  onLoading: const CircularProgressIndicator(),
+  builder: (info) => Text((info as WebInfo).title!));
+```
+
+## Renderização personalizada com construtor
 
 ```dart
 Widget _buildCustomLinkPreview(BuildContext context) {
-  return FlutterLinkPreview(
-    key: ValueKey("${_controller.value.text}211"),
+  return LinkPreviewBuilder(
     url: _controller.value.text,
     builder: (info) {
       if (info == null) return const SizedBox();
@@ -108,8 +131,6 @@ Widget _buildCustomLinkPreview(BuildContext context) {
 }
 ```
 
-![Result Image](images/web3.png)
+## Código de amostra
 
-## 示例代码
-
-[点击这里查看详细示例](example/lib/main.dart).
+[Clique aqui para obter um exemplo detalhado](exemplo/lib/main.dart). 

@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:isolate';
+import 'package:collection/collection.dart' show IterableExtension;
+import 'package:dartz/dartz.dart';
+import 'package:gbk_codec/gbk_codec.dart';
 import 'package:html/dom.dart' hide Text;
 import 'package:html/parser.dart' as parser;
-import 'package:gbk_codec/gbk_codec.dart';
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:http/http.dart';
 import 'package:universal_io/io.dart';
 import '../../link_preview_builder.dart';
@@ -44,7 +45,7 @@ class WebAnalyzer {
 
   /// Get web information
   /// return [InfoBase]
-  static Future<InfoBase?> getInfo(String? url,
+  static Future<Either<String?, InfoBase?>> getInfo(String? url,
       {Duration? cache = const Duration(hours: 24),
       bool multimedia = true,
       bool useMultithread = false}) async {
@@ -52,30 +53,25 @@ class WebAnalyzer {
 
     InfoBase? info = getInfoFromCache(url);
 
-    if (info != null) return info;
+    if (info != null) return right(info);
     try {
       if (useMultithread) {
         info = await _getInfoByIsolate(url, multimedia);
       } else {
         info = await _getInfo(url!, multimedia);
       }
-
       if (cache != null && info != null) {
         info.timeout = DateTime.now().add(cache);
         _map[url] = info;
       }
     } catch (e) {
-      print("Get web error:$url, Error:$e");
+      return left("Get web error:$url, Error:$e");
     }
-
-    // print("$url cost ${DateTime.now().difference(start).inMilliseconds}");
-
-    return info;
+    return right(info);
   }
 
   static Future<InfoBase?> _getInfo(String url, bool? multimedia) async {
     final response = await _requestUrl(url);
-
     if (response == null) return null;
     if (multimedia!) {
       final String? contentType = response.headers["content-type"];
@@ -87,7 +83,10 @@ class WebAnalyzer {
         }
       }
     }
-    return _getWebInfo(response, url, multimedia);
+    final result = await _getWebInfo(response, url, multimedia);
+    return result.fold((l) {
+      print('Error in get info');
+    }, (r) => r);
   }
 
   static Future<InfoBase?> _getInfoByIsolate(
@@ -202,7 +201,7 @@ class WebAnalyzer {
     return response;
   }
 
-  static Future<InfoBase?> _getWebInfo(
+  static Future<Either<String?, InfoBase?>> _getWebInfo(
       Response response, String url, bool? multimedia) async {
     if (response.statusCode == HttpStatus.ok) {
       String? html;
@@ -212,14 +211,12 @@ class WebAnalyzer {
         try {
           html = gbk.decode(response.bodyBytes);
         } catch (e) {
-          print("Web page resolution failure from:$url Error:$e");
+          return left("Web page resolution failure from:$url");
         }
       }
 
-      if (html == null) {
-        print("Web page resolution failure from:$url");
-        return null;
-      }
+      // ignore: unnecessary_null_comparison
+      if (html == null) return left("Web page resolution failure from:$url");
 
       // Improved performance
       // final start = DateTime.now();
@@ -231,10 +228,10 @@ class WebAnalyzer {
       // get image or video
       if (multimedia!) {
         final gif = _analyzeGif(document, uri);
-        if (gif != null) return gif;
+        if (gif != null) return right(gif);
 
         final video = _analyzeVideo(document, uri);
-        if (video != null) return video;
+        if (video != null) return right(video);
       }
 
       String? title = _analyzeTitle(document);
@@ -252,9 +249,9 @@ class WebAnalyzer {
         image: _analyzeImage(document, uri),
         redirectUrl: response.request!.url.toString(),
       );
-      return info;
+      return right(info);
     }
-    return null;
+    return left('Error in get webInfo');
   }
 
   static String _getHeadHtml(String html) {

@@ -102,9 +102,9 @@ class BuildCustomLinkPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LinkPreviewBuilder(
-      key: ValueKey("${controller.value.text}211"),
       url: controller.value.text,
       builder: (info) {
+        if (info == null) const SizedBox();
         if (info is WebImageInfo)
           CachedNetworkImage(
             imageUrl: info.image ?? '',

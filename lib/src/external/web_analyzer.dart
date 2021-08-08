@@ -11,7 +11,7 @@ import '../../link_preview_builder.dart';
 
 /// Web analyzer
 class WebAnalyzer {
-  static final Map<String?, InfoBase> _map = {};
+  static final Map<String?, Preview> _map = {};
   static final RegExp _bodyReg =
       RegExp(r"<body[^>]*>([\s\S]*?)<\/body>", caseSensitive: false);
   static final RegExp _htmlReg = RegExp(
@@ -31,65 +31,65 @@ class WebAnalyzer {
     return str != null && str.isNotEmpty;
   }
 
-  /// Get web information
-  /// return [InfoBase]
-  static InfoBase? getInfoFromCache(String? url) {
-    final InfoBase? info = _map[url];
-    if (info != null) {
-      if (!info.timeout.isAfter(DateTime.now())) {
+  /// Get web previewrmation
+  /// return [Preview]
+  static Preview? getInfoFromCache(String? url) {
+    final Preview? preview = _map[url];
+    if (preview != null) {
+      if (!preview.timeout.isAfter(DateTime.now())) {
         _map.remove(url);
       }
     }
-    return info;
+    return preview;
   }
 
-  /// Get web information
-  /// return [InfoBase]
-  static Future<Either<String?, InfoBase?>> getInfo(String? url,
+  /// Get web previewrmation
+  /// return [Preview]
+  static Future<Either<String?, Preview?>> getInfo(String? url,
       {Duration? cache = const Duration(hours: 24),
       bool multimedia = true,
       bool useMultithread = false}) async {
     // final start = DateTime.now();
 
-    InfoBase? info = getInfoFromCache(url);
+    Preview? preview = getInfoFromCache(url);
 
-    if (info != null) return right(info);
+    if (preview != null) return right(preview);
     try {
       if (useMultithread) {
-        info = await _getInfoByIsolate(url, multimedia);
+        preview = await _getInfoByIsolate(url, multimedia);
       } else {
-        info = await _getInfo(url!, multimedia);
+        preview = await _getInfo(url!, multimedia);
       }
-      if (cache != null && info != null) {
-        info.timeout = DateTime.now().add(cache);
-        _map[url] = info;
+      if (cache != null && preview != null) {
+        preview.timeout = DateTime.now().add(cache);
+        _map[url] = preview;
       }
     } catch (e) {
       return left("Get web error:$url, Error:$e");
     }
-    return right(info);
+    return right(preview);
   }
 
-  static Future<InfoBase?> _getInfo(String url, bool? multimedia) async {
+  static Future<Preview?> _getInfo(String url, bool? multimedia) async {
     final response = await _requestUrl(url);
     if (response == null) return null;
     if (multimedia!) {
       final String? contentType = response.headers["content-type"];
       if (contentType != null) {
         if (contentType.contains("image/")) {
-          return WebImageInfo(image: url);
+          return MediaPreview(image: url);
         } else if (contentType.contains("video/")) {
-          return WebVideoInfo(image: url);
+          return VideoPreview(image: url);
         }
       }
     }
-    final result = await _getWebInfo(response, url, multimedia);
+    final result = await _getDataPreview(response, url, multimedia);
     return result.fold((l) {
-      print('Error in get info');
+      print('Error in get preview');
     }, (r) => r);
   }
 
-  static Future<InfoBase?> _getInfoByIsolate(
+  static Future<Preview?> _getInfoByIsolate(
       String? url, bool multimedia) async {
     final sender = ReceivePort();
     final Isolate isolate = await Isolate.spawn(_isolate, sender.sendPort);
@@ -99,15 +99,15 @@ class WebAnalyzer {
     sendPort.send([answer.sendPort, url, multimedia]);
     final List<String>? res = await (answer.first as Future<List<String>?>);
 
-    InfoBase? info;
+    Preview? preview;
     if (res != null) {
       if (res[0] == "0") {
-        info = WebInfo(
+        preview = DataPreview(
             title: res[1], description: res[2], icon: res[3], image: res[4]);
       } else if (res[0] == "1") {
-        info = WebVideoInfo(image: res[1]);
+        preview = VideoPreview(image: res[1]);
       } else if (res[0] == "2") {
-        info = WebImageInfo(image: res[1]);
+        preview = MediaPreview(image: res[1]);
       }
     }
 
@@ -115,7 +115,7 @@ class WebAnalyzer {
     answer.close();
     isolate.kill(priority: Isolate.immediate);
 
-    return info;
+    return preview;
   }
 
   static void _isolate(SendPort sendPort) {
@@ -126,15 +126,20 @@ class WebAnalyzer {
       final String url = message[1];
       final bool? multimedia = message[2];
 
-      final info = await _getInfo(url, multimedia);
+      final preview = await _getInfo(url, multimedia);
 
-      if (info is WebInfo) {
-        sender!
-            .send(["0", info.title, info.description, info.icon, info.image]);
-      } else if (info is WebVideoInfo) {
-        sender!.send(["1", info.image]);
-      } else if (info is WebImageInfo) {
-        sender!.send(["2", info.image]);
+      if (preview is DataPreview) {
+        sender!.send([
+          "0",
+          preview.title,
+          preview.description,
+          preview.icon,
+          preview.image
+        ]);
+      } else if (preview is VideoPreview) {
+        sender!.send(["1", preview.image]);
+      } else if (preview is MediaPreview) {
+        sender!.send(["2", preview.image]);
       } else {
         sender!.send(null);
       }
@@ -201,7 +206,7 @@ class WebAnalyzer {
     return response;
   }
 
-  static Future<Either<String?, InfoBase?>> _getWebInfo(
+  static Future<Either<String?, Preview?>> _getDataPreview(
       Response response, String url, bool? multimedia) async {
     if (response.statusCode == HttpStatus.ok) {
       String? html;
@@ -242,16 +247,16 @@ class WebAnalyzer {
         description = null;
       }
 
-      final info = WebInfo(
+      final preview = DataPreview(
         title: title,
         icon: _analyzeIcon(document, uri),
         description: description,
         image: _analyzeImage(document, uri),
         redirectUrl: response.request!.url.toString(),
       );
-      return right(info);
+      return right(preview);
     }
-    return left('Error in get webInfo');
+    return left('Error in get DataPreview');
   }
 
   static String _getHeadHtml(String html) {
@@ -268,17 +273,17 @@ class WebAnalyzer {
     return head.toString();
   }
 
-  static InfoBase? _analyzeGif(Document document, Uri uri) {
+  static Preview? _analyzeGif(Document document, Uri uri) {
     if (_getMetaContent(document, "property", "og:image:type") == "image/gif") {
       final gif = _getMetaContent(document, "property", "og:image");
-      if (gif != null) return WebImageInfo(image: _handleUrl(uri, gif));
+      if (gif != null) return MediaPreview(image: _handleUrl(uri, gif));
     }
     return null;
   }
 
-  static InfoBase? _analyzeVideo(Document document, Uri uri) {
+  static Preview? _analyzeVideo(Document document, Uri uri) {
     final video = _getMetaContent(document, "property", "og:video");
-    if (video != null) return WebVideoInfo(image: _handleUrl(uri, video));
+    if (video != null) return VideoPreview(image: _handleUrl(uri, video));
     return null;
   }
 

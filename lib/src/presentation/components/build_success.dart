@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:link_preview_builder/link_preview_builder.dart';
 
 class BuildSuccess extends StatelessWidget {
-  final InfoBase info;
+  final Preview preview;
   final TextStyle? titleStyle;
   final TextStyle? bodyStyle;
   const BuildSuccess(
-      {Key? key, required this.info, this.titleStyle, this.bodyStyle})
+      {Key? key, required this.preview, this.titleStyle, this.bodyStyle})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final WebInfo data = info as WebInfo;
+    final DataPreview data = preview as DataPreview;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

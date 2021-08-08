@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../link_preview_builder.dart';
 
-/// Link Preview Widget
-class LinkPreviewBuilder extends StatefulWidget {
+class LinkPreviewBuilder extends StatelessWidget {
   const LinkPreviewBuilder({
     Key? key,
     this.url,
-    this.info,
+    this.preview,
     this.cache,
     this.builder,
     this.titleStyle,
@@ -23,13 +22,13 @@ class LinkPreviewBuilder extends StatefulWidget {
   final String? url;
 
   // Web address, HTTP and HTTPS support
-  final InfoBase? info;
+  final Preview? preview;
 
   /// Cache result time, default cache 1 hour
   final Duration? cache;
 
   /// Customized your success state
-  final Widget Function(InfoBase? info)? builder;
+  final Widget Function(Preview? preview)? builder;
 
   /// Customized your empty state
   final Widget? onEmpty;
@@ -53,41 +52,26 @@ class LinkPreviewBuilder extends StatefulWidget {
   final bool? useMultithread;
 
   @override
-  _LinkPreviewBuilderState createState() => _LinkPreviewBuilderState();
-}
-
-class _LinkPreviewBuilderState extends State<LinkPreviewBuilder> {
-  late GetLinkPreview _getLinkPreview;
-  late LinkPreviewController _controller;
-
-  @override
-  void initState() {
-    _getLinkPreview = GetLinkPreview();
-    _controller = LinkPreviewController(_getLinkPreview);
-    _controller.onInit(info: widget.info, url: widget.url);
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final _controller = LinkPreviewController();
+    _controller.onInit(preview: preview, url: url);
     return ValueListenableBuilder<status>(
         valueListenable: _controller.state,
         builder: (_, state, child) {
           switch (state) {
             case status.init:
-              return widget.onEmpty ?? const BuildEmpty();
+              return onEmpty ?? const BuildEmpty();
             case status.success:
-              return widget.builder != null
-                  ? widget.builder!(_controller.data.value!)
-                  : BuildSuccess(info: _controller.data.value!);
+              return builder != null
+                  ? builder!(_controller.data.value!)
+                  : BuildSuccess(preview: _controller.data.value!);
             case status.error:
-              return widget.onError != null
-                  ? widget.onError!(
-                      _controller.error.value ?? 'Error fetching data!')
+              return onError != null
+                  ? onError!(_controller.error.value ?? 'Error fetching data!')
                   : BuildError(
                       error: _controller.error.value ?? 'Error fetching data!');
             case status.loading:
-              return widget.onEmpty ?? const BuildLoading();
+              return onEmpty ?? const BuildLoading();
           }
         });
   }

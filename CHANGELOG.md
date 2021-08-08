@@ -4,7 +4,7 @@
 
 ## [1.5.5] - 2020-8-31.
 
--   WebInfo adds redirectUrl property to record redirect addresses for short connections
+-   DataPreview adds redirectUrl property to record redirect addresses for short connections
 
 ## [1.5.4] - 2020-8-28.
 
@@ -58,7 +58,7 @@
 
 ## [1.2.10] - 2020-7-20.
 
--   Change the parameters from WebInfo to InfoBase
+-   Change the parameters from DataPreview to InfoBase
 
 ## [1.2.9] - 2020-6-28.
 

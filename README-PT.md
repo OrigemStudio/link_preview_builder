@@ -42,7 +42,7 @@ LinkPreviewBuilder(
 
 ```dart
 LinkPreviewBuilder(
-  info: InfoData(),
+  preview: Preview(),
 )
 ```
 
@@ -54,7 +54,7 @@ LinkPreviewBuilder(
   onEmpty: const Text('empty state'),
   onError: (error) => Text(error ?? 'error'),
   onLoading: const CircularProgressIndicator(),
-  builder: (info) => Text((info as WebInfo).title!));
+  builder: (preview) => Text((preview as DataPreview).title!));
 ```
 
 ## Renderização personalizada com construtor
@@ -63,17 +63,17 @@ LinkPreviewBuilder(
 Widget _buildCustomLinkPreview(BuildContext context) {
   return LinkPreviewBuilder(
     url: _controller.value.text,
-    builder: (info) {
-      if (info == null) return const SizedBox();
-      if (info is WebImageInfo) {
+    builder: (preview) {
+      if (preview == null) return const SizedBox();
+      if (preview is MediaPreview) {
         return CachedNetworkImage(
-          imageUrl: info.image,
+          imageUrl: preview.image,
           fit: BoxFit.contain,
         );
       }
 
-      final WebInfo webInfo = info;
-      if (!WebAnalyzer.isNotEmpty(webInfo.title)) return const SizedBox();
+      final DataPreview dataPreview = preview;
+      if (!WebAnalyzer.isNotEmpty(dataPreview.title)) return const SizedBox();
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -86,7 +86,7 @@ Widget _buildCustomLinkPreview(BuildContext context) {
             Row(
               children: <Widget>[
                 CachedNetworkImage(
-                  imageUrl: webInfo.icon ?? "",
+                  imageUrl: dataPreview.icon ?? "",
                   imageBuilder: (context, imageProvider) {
                     return Image(
                       image: imageProvider,
@@ -102,24 +102,24 @@ Widget _buildCustomLinkPreview(BuildContext context) {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    webInfo.title,
+                    dataPreview.title,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            if (WebAnalyzer.isNotEmpty(webInfo.description)) ...[
+            if (WebAnalyzer.isNotEmpty(dataPreview.description)) ...[
               const SizedBox(height: 8),
               Text(
-                webInfo.description,
+                dataPreview.description,
                 maxLines: 5,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            if (WebAnalyzer.isNotEmpty(webInfo.image)) ...[
+            if (WebAnalyzer.isNotEmpty(dataPreview.image)) ...[
               const SizedBox(height: 8),
               CachedNetworkImage(
-                imageUrl: webInfo.image,
+                imageUrl: dataPreview.image,
                 fit: BoxFit.contain,
               ),
             ]

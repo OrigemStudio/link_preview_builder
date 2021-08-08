@@ -1,16 +1,16 @@
-abstract class InfoBase {
+abstract class Preview {
   late DateTime timeout;
 }
 
 /// Web Information
-class WebInfo extends InfoBase {
+class DataPreview extends Preview {
   final String? title;
   final String? icon;
   final String? description;
   final String? image;
   final String? redirectUrl;
 
-  WebInfo({
+  DataPreview({
     this.title,
     this.icon,
     this.description,
@@ -20,13 +20,13 @@ class WebInfo extends InfoBase {
 }
 
 /// Image Information
-class WebImageInfo extends InfoBase {
+class MediaPreview extends Preview {
   final String? image;
 
-  WebImageInfo({this.image});
+  MediaPreview({this.image});
 }
 
 /// Video Information
-class WebVideoInfo extends WebImageInfo {
-  WebVideoInfo({String? image}) : super(image: image);
+class VideoPreview extends MediaPreview {
+  VideoPreview({String? image}) : super(image: image);
 }

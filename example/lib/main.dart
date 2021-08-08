@@ -103,22 +103,22 @@ class BuildCustomLinkPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return LinkPreviewBuilder(
       url: controller.value.text,
-      builder: (info) {
-        if (info == null) const SizedBox();
-        if (info is WebImageInfo)
+      builder: (preview) {
+        if (preview == null) const SizedBox();
+        if (preview is MediaPreview)
           CachedNetworkImage(
-            imageUrl: info.image ?? '',
+            imageUrl: preview.image ?? '',
             fit: BoxFit.contain,
           );
-        final WebInfo webInfo = info as WebInfo;
-        if (webInfo.title == null) const SizedBox();
+        final DataPreview dataPreview = preview as DataPreview;
+        if (dataPreview.title == null) const SizedBox();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Row(
               children: <Widget>[
                 CachedNetworkImage(
-                  imageUrl: webInfo.icon ?? "",
+                  imageUrl: dataPreview.icon ?? "",
                   imageBuilder: (context, imageProvider) {
                     return Image(
                       image: imageProvider,
@@ -134,26 +134,26 @@ class BuildCustomLinkPreview extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    webInfo.title ?? '',
+                    dataPreview.title ?? '',
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            if (webInfo.description != null) ...[
+            if (dataPreview.description != null) ...[
               const SizedBox(height: 8),
               Text(
-                webInfo.description ?? '',
+                dataPreview.description ?? '',
                 maxLines: 5,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            if (webInfo.image != null) ...[
+            if (dataPreview.image != null) ...[
               const SizedBox(height: 8),
               SizedBox(
                 height: 200,
                 child: CachedNetworkImage(
-                  imageUrl: webInfo.image ?? '',
+                  imageUrl: dataPreview.image ?? '',
                   fit: BoxFit.contain,
                 ),
               ),

@@ -17,6 +17,8 @@ class DataPreview extends Preview {
     this.image,
     this.redirectUrl,
   });
+
+  String toString() => '$title, $icon, $description';
 }
 
 /// Image Information

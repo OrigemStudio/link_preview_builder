@@ -24,6 +24,8 @@ class AppController {
   final urls = ValueNotifier<List<String>>([
     'https://www.uol.com.br/esporte/olimpiadas/reportagens-especiais/thiago-braz-prova-que-um-raio-cai-duas-vezes-no-mesmo-lugar-e-e-bronze/',
     'https://g1.globo.com/mundo/noticia/2021/08/02/quais-sao-as-regras-para-a-entrada-de-brasileiros-na-europa.ghtml',
+    'https://24x7mag.com/inside-htm/company-news/philips-indonesian-hospital-partner-for-patient-centered-care/?campaign_type=newsletter&_hsmi=97774236&_hsenc=p2ANqtz-9nKQ-H_yvdzUd7gKKf_zieiTyE5FAvv8Lqul6i42iMkSiQXmA_UgMs9ehG1A8zjx1FYKeDde8Fc-QDA1HrcEjd9b7Y5rCc08CZlCD3-igpz0xPa1E',
+    'https://24x7mag.com/medical-equipment/imaging-equipment/ultrasound/mindray-debuts-point-care-ultrasound-system/'
   ]);
 }
 
